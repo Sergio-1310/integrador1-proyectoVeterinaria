@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Clinica Veterinaria Rodriguez</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/css/index.css}">
+    <link rel="icon" th:href="@{/img/portadafondo.png}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <style>
+        .header-bg {
+            background-color: #e0b0ff;
+            color: #4b0082;
+            padding: 15px 0;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .pet-details-card {
+            background-color: #f8f9fa;
+            border-left: 5px solid #c9e6c9;
+        }
+        .attention-card {
+            border-left: 4px solid #4b0082;
+            margin-bottom: 15px;
+        }
+        .attention-card-header {
+            background-color: #e0b0ff;
+            color: #4b0082;
+        }
+    </style>
+    <title th:text="'Historial de ' + ${mascota.nombre}"></title>
+</head>
+<body>
+    <header>
+         <div th:replace="fragments/navbar :: navbar"></div>
+    </header> 
+   
+  <div class="card p-4 my-4 custom-main-card"> 
+    <div class="container my-4">
+  
+        <div th:if="${mensaje}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${mensaje}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card p-4 pet-details-card shadow-sm">
+                    <div class="row align-items-center">
+                        <div class="col-md-2 text-center">
+                            <img th:src="@{${mascota.rutaFoto}}" alt="Foto de Mascota" class="img-fluid rounded-circle" style="width: 120px; height: 120px; object-fit: cover;">
+                        </div>
+                        <div class="col-md-10">
+                            <h4 th:text="${mascota.nombre} + ' (' + ${mascota.especie} + ')'"></h4>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p class="mb-1"><strong>Raza:</strong> <span th:text="${mascota.raza}"></span></p>
+                                    <p class="mb-1"><strong>Sexo:</strong> <span th:text="${mascota.sexo}"></span></p>
+                                    <p class="mb-1"><strong>Edad:</strong> <span th:text="${mascota.edad}"></span> años</p>
+                                    <p class="mb-1"><strong>Peso:</strong> <span th:text="${mascota.peso}"></span> kg</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p class="mb-1"><strong>Color:</strong> <span th:text="${mascota.color}"></span></p>
+                                    <p class="mb-1"><strong>Esterilizado:</strong> <span th:text="${mascota.esterilizado} ? 'Sí' : 'No'"></span></p>
+                                    <p class="mb-1"><strong>Medicina Preventiva:</strong> <span th:text="${mascota.medicinaPreventiva}"></span></p>
+                                </div>
+                            </div>
+                            <h6 class="mt-3">Datos del Dueño:</h6>
+                            <p class="mb-1"><strong>Nombre:</strong> <span th:text="${mascota.nombreDueno}"></span></p>
+                            <p class="mb-1"><strong>Teléfono:</strong> <span th:text="${mascota.telefonoDueno}"></span></p>
+                            <p class="mb-1"><strong>Dirección:</strong> <span th:text="${mascota.direccionDueno}"></span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3>Atenciones Registradas</h3>
+            <button type="button" class="btn" style="background-color: #c9e6c9; color: #4b0082; border-color: #c9e6c9;" data-bs-toggle="modal" th:data-bs-target="'#modalRegistrarAtencion' + ${mascota.id}">
+                Registrar Nueva Atención
+            </button>
+        </div>
+
+        <div th:if="${atenciones.isEmpty()}" class="alert alert-info">
+            Esta mascota aún no tiene atenciones registradas.
+        </div>
+
+        <div th:unless="${atenciones.isEmpty()}">
+            <div class="card attention-card p-3 mb-3" th:each="atencion : ${atenciones}">
+                <div class="card-header attention-card-header fw-bold d-flex justify-content-between align-items-center">
+                    <span th:text="${#dates.format(atencion.fechaAtencion, 'dd-MM-yyyy')}"></span>
+                    <div>
+                        <button type="button" class="btn btn-sm btn-outline-light me-2" data-bs-toggle="modal" 
+                                th:data-bs-target="'#modalEditarAtencion' + ${atencion.id}"
+                                th:data-attention-id="${atencion.id}"
+                                th:data-attention-date="${#dates.format(atencion.fechaAtencion, 'yyyy-MM-dd')}"
+                                th:data-attention-diagnostico="${atencion.diagnostico}"
+                                th:data-attention-tratamiento="${atencion.tratamiento}"
+                                th:data-attention-temperatura="${atencion.temperatura}"
+                                th:data-attention-pulso="${atencion.pulso}"
+                                th:data-attention-llenado-capilar="${atencion.llenadoCapilar}"
+                                th:data-attention-fr="${atencion.fr}"
+                                th:data-attention-pruebas="${atencion.pruebasRealizadas}">
+                            Editar
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-light" data-bs-toggle="modal" th:data-bs-target="'#modalEliminarAtencion' + ${atencion.id}">
+                            Eliminar
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Diagnóstico:</strong> <span th:text="${atencion.diagnostico}"></span></p>
+                            <p class="mb-1"><strong>Tratamiento:</strong> <span th:text="${atencion.tratamiento}"></span></p>
+                            <p class="mb-1"><strong>Pruebas Realizadas:</strong> <span th:text="${atencion.pruebasRealizadas}"></span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Temperatura:</strong> <span th:text="${atencion.temperatura}"></span></p>
+                            <p class="mb-1"><strong>Pulso:</strong> <span th:text="${atencion.pulso}"></span></p>
+                            <p class="mb-1"><strong>Llenado Capilar:</strong> <span th:text="${atencion.llenadoCapilar}"></span></p>
+                            <p class="mb-1"><strong>FR:</strong> <span th:text="${atencion.fr}"></span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal fade" th:id="modalEliminarAtencion + ${atencion.id}" tabindex="-1" aria-labelledby="modalEliminarAtencionLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="modalEliminarAtencionLabel">Confirmar Eliminación</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                ¿Estás seguro de que quieres eliminar esta atención del <strong th:text="${#dates.format(atencion.fechaAtencion, 'dd-MM-yyyy')}"></strong>?
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <form th:action="@{/historial_clinico/eliminar_atencion/{id}(id=${atencion.id})}" method="post">
+                                    <button type="submit" class="btn btn-danger">Eliminar Atención</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal fade modal-edit-attention" th:id="modalEditarAtencion + ${atencion.id}" tabindex="-1" aria-labelledby="modalEditarAtencionLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="modalEditarAtencionLabel">Editar Atención para <span th:text="${mascota.nombre}"></span></h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <form th:action="@{/historial_clinico/editar_atencion/{id}(id=${atencion.id})}" method="post" th:object="${editarAtencion}">
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label for="editFechaAtencion" class="form-label">Fecha de Atención:</label>
+                                        <input type="date" class="form-control" id="editFechaAtencion" name="fechaAtencionInput" th:value="${#dates.format(atencion.fechaAtencion, 'yyyy-MM-dd')}" required>
+                                    </div>
+                                    <h6 class="fw-bold mb-3">Constantes Fisiológicas</h6>
+                                    <div class="row g-3 mb-4">
+                                        <div class="col-md-3"><label for="editTemperatura" class="form-label">Temperatura:</label><input type="text" th:field="*{temperatura}" class="form-control" id="editTemperatura" th:value="${atencion.temperatura}"></div>
+                                        <div class="col-md-3"><label for="editPulso" class="form-label">Pulso:</label><input type="text" th:field="*{pulso}" class="form-control" id="editPulso" th:value="${atencion.pulso}"></div>
+                                        <div class="col-md-3"><label for="editLlenadoCapilar" class="form-label">Llenado Capilar:</label><input type="text" th:field="*{llenadoCapilar}" class="form-control" id="editLlenadoCapilar" th:value="${atencion.llenadoCapilar}"></div>
+                                        <div class="col-md-3"><label for="editFr" class="form-label">FR (Resp. Frecuencia):</label><input type="text" th:field="*{fr}" class="form-control" id="editFr" th:value="${atencion.fr}"></div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="editDiagnostico" class="form-label">Diagnóstico:</label>
+                                        <textarea th:field="*{diagnostico}" class="form-control" id="editDiagnostico" rows="3" th:text="${atencion.diagnostico}"></textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="editTratamiento" class="form-label">Tratamiento:</label>
+                                        <textarea th:field="*{tratamiento}" class="form-control" id="editTratamiento" rows="3" th:text="${atencion.tratamiento}"></textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="editPruebasRealizadas" class="form-label">Pruebas Realizadas:</label>
+                                        <textarea th:field="*{pruebasRealizadas}" class="form-control" id="editPruebasRealizadas" rows="2" th:text="${atencion.pruebasRealizadas}"></textarea>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-center mt-4">
+            <a th:href="@{/}" class="btn btn-secondary">Volver al Inicio</a>
+        </div>
+    </div>
+    
+    <div class="modal fade" th:id="'modalRegistrarAtencion' + ${mascota.id}" tabindex="-1" aria-labelledby="modalRegistrarAtencionLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalRegistrarAtencionLabel">Registrar Nueva Atención para <span th:text="${mascota.nombre}"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form th:action="@{/historial_clinico/registrar_atencion/{id}(id=${mascota.id})}" method="post" th:object="${nuevaAtencion}">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="fechaAtencion" class="form-label">Fecha de Atención:</label>
+                            <input type="date" class="form-control" id="fechaAtencion" name="fechaAtencionInput" required>
+                        </div>
+                        <h6 class="fw-bold mb-3">Constantes Fisiológicas</h6>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-3"><label for="temperatura" class="form-label">Temperatura:</label><input type="text" th:field="*{temperatura}" class="form-control" id="temperatura"></div>
+                            <div class="col-md-3"><label for="pulso" class="form-label">Pulso:</label><input type="text" th:field="*{pulso}" class="form-control" id="pulso"></div>
+                            <div class="col-md-3"><label for="llenadoCapilar" class="form-label">Llenado Capilar:</label><input type="text" th:field="*{llenadoCapilar}" class="form-control" id="llenadoCapilar"></div>
+                            <div class="col-md-3"><label for="fr" class="form-label">FR (Resp. Frecuencia):</label><input type="text" th:field="*{fr}" class="form-control" id="fr"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="diagnostico" class="form-label">Diagnóstico:</label>
+                            <textarea th:field="*{diagnostico}" class="form-control" id="diagnostico" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="tratamiento" class="form-label">Tratamiento:</label>
+                            <textarea th:field="*{tratamiento}" class="form-control" id="tratamiento" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="pruebasRealizadas" class="form-label">Pruebas Realizadas:</label>
+                            <textarea th:field="*{pruebasRealizadas}" class="form-control" id="pruebasRealizadas" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn" style="background-color: #4b0082; color: white;">Registrar Atención</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Script para cargar los datos en el modal de edición de atención
+        document.addEventListener('DOMContentLoaded', function() {
+            var editAttentionModals = document.querySelectorAll('.modal-edit-attention');
+            editAttentionModals.forEach(function(modalElement) {
+                modalElement.addEventListener('show.bs.modal', function (event) {
+                    var button = event.relatedTarget; // Botón que activó el modal
+                    var attentionId = button.getAttribute('data-attention-id');
+                    // Los th:value en los campos del formulario manejan la precarga de datos
+                    // El JS se encarga de que la acción del formulario sea la correcta
+                    var modalForm = modalElement.querySelector('form');
+                    modalForm.action = '/historial_clinico/editar_atencion/' + attentionId;
+                });
+            });
+        });
+    </script>
+ <footer>
+        <p>&copy; 2025 Veterinaria Rodriguez Todos los derechos reservados.</p>
+    </footer>
+    <script th:src="@{/js/animacion.js}"></script>
+    <script th:src="@{/js/script.js}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+</body>
+</html>
