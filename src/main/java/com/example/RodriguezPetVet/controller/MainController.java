@@ -20,19 +20,15 @@ import java.nio.file.Paths;
 @Controller
 public class MainController {
 
-    @GetMapping("/")
+    
+    @GetMapping("/index")
     public String home() {
-        return "index";
+        return "index"; 
     }
-     
-    
-  
 
- 
-    
-     @GetMapping("/Dashboard")
+    @GetMapping("/Dashboard")
     public String Dashboard() {
-        return "Dashboard"; 
+        return "Dashboard";
     }
 }
     

@@ -305,4 +305,13 @@ button:hover {
   }
 }
 
+.title-background {
+    display: block; /* ocupa todo el ancho */
+    background-color: rgba(255, 255, 255, 0.7);
+    padding: 0.3rem 0.6rem;
+    border-radius: 0.3rem;
+    width: fit-content; /*se ajusta al contenido */
+    margin: 0 auto; /* centra el bloque */
+}
+
 

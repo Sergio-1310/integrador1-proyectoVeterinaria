@@ -1,7 +1,7 @@
 <nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark" style="background-color:#35424a;">
     <div class="container">
         <a class="navbar-brand d-flex align-items-center gap-2" th:href="@{/}">
-            <img th:src="@{/img/image-removebg-preview.png}" alt="Veterinaria Rodriguez" 
+            <img th:src="@{/img/veterinariaLogo.png}" alt="Veterinaria Rodriguez" 
                  class="rounded-circle object-fit-cover" style="width:60px; height:60px;">
             <span class="fw-bolder text-uppercase" style="color:#00bfae; font-family: Montserrat, sans-serif;">
                 Veterinaria Rodriguez Pet
@@ -14,10 +14,16 @@
         <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
             <ul class="navbar-nav gap-2">
                 <li class="nav-item"><a class="nav-link" th:href="@{/}"><i class="fa-solid fa-house"></i> Inicio</a></li>
-                <li class="nav-item"><a class="nav-link" th:href="@{/citas}"><i class="fa-solid fa-users"></i>Citas</a></li>
-                <li class="nav-item"><a class="nav-link" th:href="@{/inventory}"><i class="fa-solid fa-paw"></i>Inventario General</a></li>
-                <li class="nav-item"><a class="nav-link" th:href="@{/historial_clinico}"><i class="fa-solid fa-envelope"></i>Historial Medico</a></li>
-                <li class="nav-item"><a class="nav-link" th:href="@{/Dashboard}"><i class="fa-solid fa-briefcase"></i>Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/citas}"><i class="fa-solid fa-users"></i> Citas</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/inventory}"><i class="fa-solid fa-paw"></i> Inventario General</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/historial_clinico}"><i class="fa-solid fa-envelope"></i> Historial Medico</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/dashboard}"><i class="fa-solid fa-briefcase"></i> Dashboard</a></li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="document.getElementById('logoutForm').submit(); return false;">
+                        <i class="fa-solid fa-right-from-bracket">
+                        </i> Cerrar sesión</a>
+                        <form id="logoutForm" th:action="@{/logout}" method="post"></form>
+                </li>
             </ul>
         </div>
     </div>
