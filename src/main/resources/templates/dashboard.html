@@ -28,9 +28,9 @@
     <header>
         <div th:replace="fragments/navbar :: navbar"></div>
     </header>
-
+    <div class="card p-4 my-4 custom-main-card">
     <div class="container my-5">
-        <h1 class="mb-4 text-center title-background">Dashboard administrativo</h1>
+        <h1 class="mb-4 text-center">Dashboard administrativo</h1>
 
         <div class="row g-4">
             <!-- Número de citas programadas -->
@@ -62,7 +62,7 @@
         </div>
 
         <div class="mt-5">
-            <h4 class="mt-5 title-background">Resumen de Productos con Bajo Stock</h4>
+            <h4 class="mt-5 text-center">Resumen de Productos con Bajo Stock</h4>
             <ul class="list-group mt-3">
                 <li th:each="product : ${lowStockProducts}" class="list-group-item d-flex justify-content-between align-items-center">
                     <span th:text="${product.name}">Producto</span>
@@ -71,6 +71,7 @@
                 <li th:if="${lowStockProducts.empty}" class="list-group-item text-center text-muted">No hay productos con stock bajo.</li>
             </ul>
         </div>
+    </div>
     </div>
 
     <footer>
