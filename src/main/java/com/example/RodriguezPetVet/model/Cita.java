@@ -23,6 +23,7 @@ public class Cita {
 
     // Aquí almacenarás la fecha y hora de la cita
     @Temporal(TemporalType.TIMESTAMP)
+    @jakarta.persistence.Column(name = "fecha_hora") 
     private Date fechaHora;
 
     private String nombreCliente;

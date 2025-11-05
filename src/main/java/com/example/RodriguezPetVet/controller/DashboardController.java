@@ -13,6 +13,8 @@ import com.example.RodriguezPetVet.repository.CitaRepository;
 import com.example.RodriguezPetVet.repository.MascotaRepository;
 import com.example.RodriguezPetVet.repository.ProductRepository;
 
+import java.util.List; // Necesaria para el tipo List de las consultas
+
 @Controller
 public class DashboardController {
 
@@ -32,7 +34,7 @@ public class DashboardController {
     public String showDashboard(Model model, HttpSession session) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        // Verificar si el usuario tiene rol ADMIN
+        // 1. Verificar si el usuario tiene rol ADMIN (Lógica de Seguridad)
         boolean esAdmin = auth.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .anyMatch(role -> role.equals("ROLE_ADMIN"));
@@ -41,26 +43,30 @@ public class DashboardController {
             return "redirect:/acceso_denegado";
         }
 
-        // Total de citas
+        // 2. Obtener datos para las tarjetas resumen
         long totalCitas = citaRepository.count();
-
-        // Total de mascotas
         long totalMascotas = mascotaRepository.count();
-
-        // Productos con bajo stock
         var lowStockProducts = productRepository.findLowStockProducts();
-
-        // Total de stock disponible
         long totalStock = productRepository.findAll()
-                                           .stream()
-                                           .mapToLong(p -> p.getQuantity())
-                                           .sum();
+                .stream()
+                .mapToLong(p -> p.getQuantity())
+                .sum();
 
-        // Enviar datos a Thymeleaf
+        // 3. Obtener datos para los gráficos por mes (¡NUEVO!)
+        List<Object[]> citasPorMesData = citaRepository.countCitasByMonth();
+        List<Object[]> mascotasPorSexoData = mascotaRepository.countMascotasBySexo();
+        
+        // 4. Enviar datos a Thymeleaf (Model)
+        
+        // Datos de tarjetas
         model.addAttribute("numAppointments", totalCitas);
         model.addAttribute("numPetsAttended", totalMascotas);
         model.addAttribute("lowStockProducts", lowStockProducts);
         model.addAttribute("totalStock", totalStock);
+
+        // Datos para gráficos (¡NUEVO!)
+        model.addAttribute("citasPorMesData", citasPorMesData);
+        model.addAttribute("mascotasPorSexoData", mascotasPorSexoData);
 
         return "dashboard"; // dashboard.html
     }
