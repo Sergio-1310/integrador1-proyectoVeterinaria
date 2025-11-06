@@ -19,26 +19,31 @@
         <div class="card p-4 shadow-sm">
             <h2 class="mb-4">Procesar Venta</h2>
 
+            <!-- Mensaje de éxito (oculto al inicio) -->
+            <div id="mensajeExito" class="alert alert-success d-none">
+                ✅ Comprobante generado exitosamente.
+            </div>
+
             <div class="mb-3">
                 <p><strong>Producto:</strong> <span th:text="${product.name}"></span></p>
-                <p><strong>Precio:</strong> S/ <span
-                        th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 2, 'POINT')}"></span></p>
+                <p><strong>Precio:</strong> S/
+                    <span th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 2, 'POINT')}"></span>
+                </p>
                 <p><strong>Stock disponible:</strong> <span th:text="${product.quantity}"></span></p>
             </div>
 
-            <form th:action="@{/productos/procesar_venta}" method="post">
+            <form id="ventaForm" th:action="@{/productos/procesar_venta}" method="post">
                 <input type="hidden" name="productId" th:value="${product.id}" />
-
                 <div class="mb-3">
                     <label for="amount" class="form-label">Cantidad a vender:</label>
                     <input type="number" id="amount" name="amount" class="form-control" min="1" required>
                 </div>
 
-                <button type="submit" class="btn btn-success">
-                    <i class="fa-solid fa-check"></i> Confirmar Venta
+                <button type="submit" id="btnComprobante" class="btn btn-danger">
+                    <i class="fa-solid fa-file-pdf"></i> Generar Comprobante (PDF)
                 </button>
 
-                <a th:href="@{/inventory}" class="btn btn-secondary ms-2">Volver al Inventario</a>
+                <a id="btnCancelar" th:href="@{/inventory}" class="btn btn-secondary ms-2">Cancelar</a>
             </form>
         </div>
     </div>
@@ -46,6 +51,46 @@
     <footer class="text-center mt-5">
         <p>&copy; 2025 Veterinaria Rodriguez. Todos los derechos reservados.</p>
     </footer>
+
+    <script>
+        const form = document.getElementById("ventaForm");
+        const mensaje = document.getElementById("mensajeExito");
+        const btnCancelar = document.getElementById("btnCancelar");
+
+        form.addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            const formData = new FormData(form);
+
+            // Enviar el formulario como POST
+            fetch(form.action, {
+                method: "POST",
+                body: formData
+            })
+                .then(response => {
+                    if (!response.ok) throw new Error("Error al generar el comprobante");
+                    return response.blob();
+                })
+                .then(blob => {
+                    // Descargar el PDF
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = "comprobante_venta.pdf";
+                    a.click();
+
+                    // Mostrar mensaje de éxito
+                    mensaje.classList.remove("d-none");
+
+                    // Cambiar texto del botón cancelar
+                    btnCancelar.textContent = "Volver al Inventario";
+                })
+                .catch(error => {
+                    alert("❌ Hubo un problema al generar el comprobante.");
+                    console.error(error);
+                });
+        });
+    </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

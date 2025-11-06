@@ -7,6 +7,7 @@ package com.example.RodriguezPetVet.controller;
 
 import com.example.RodriguezPetVet.model.Product;
 import com.example.RodriguezPetVet.repository.ProductRepository;
+import com.example.RodriguezPetVet.service.ReporteVentaPdfService;
 import com.example.RodriguezPetVet.service.ReporteInventarioService;
 
 import org.apache.commons.io.FileUtils;
@@ -36,6 +37,9 @@ public class ProductController {
 
     @Autowired
     private ReporteInventarioService reporteInventarioService;
+
+    @Autowired
+    private ReporteVentaPdfService reporteVentaPdfService;
 
     // mostrar el inventario general
     @GetMapping("/inventory")
@@ -106,24 +110,33 @@ public class ProductController {
         return "venta"; // vista venta.html
     }
 
-    // procesar la venta
+    // Procesar venta y generar PDF
     @PostMapping("/productos/procesar_venta")
-    public String processSale(@RequestParam Long productId,
-            @RequestParam Integer amount,
-            RedirectAttributes ra) {
+    public ResponseEntity<InputStreamResource> processSale(
+            @RequestParam Long productId,
+            @RequestParam Integer amount) {
+
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("ID no válido: " + productId));
 
-        if (product.getQuantity() >= amount) {
-            product.setQuantity(product.getQuantity() - amount);
-            productRepository.save(product);
-            ra.addFlashAttribute("message",
-                    "Venta de " + amount + " unidades de '" + product.getName() + "' realizada con éxito.");
-        } else {
-            ra.addFlashAttribute("message", "Error: stock insuficiente para la venta.");
+        if (product.getQuantity() < amount) {
+            throw new IllegalArgumentException("Stock insuficiente para la venta.");
         }
 
-        return "redirect:/inventory";
+        // Actualizar stock
+        product.setQuantity(product.getQuantity() - amount);
+        productRepository.save(product);
+
+        // Generar PDF directamente
+        ByteArrayInputStream pdfStream = reporteVentaPdfService.generarReporteVenta(product, amount);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Disposition", "attachment; filename=comprobante_venta.pdf");
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(new InputStreamResource(pdfStream));
     }
 
     // reporte en excel
