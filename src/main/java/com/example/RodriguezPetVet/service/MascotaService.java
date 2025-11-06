@@ -17,7 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.UUID; // Para generar nombres de archivo únicos
+import java.util.UUID;
 
 @Service
 public class MascotaService {
