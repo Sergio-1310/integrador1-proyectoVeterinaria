@@ -33,15 +33,15 @@ public class ProductController {
 
     @Autowired
     private ProductRepository productRepository;
-    
+
     @Autowired
     private ReporteInventarioService reporteInventarioService;
-   
 
+    // mostrar el inventario general
     @GetMapping("/inventory")
     public String viewInventoryPage(Model model, @RequestParam(required = false) String keyword) {
         List<Product> products;
-        
+
         // Manejar la BÚSQUEDA
         if (keyword != null && !keyword.isEmpty()) {
             products = productRepository.findByNameContainingIgnoreCase(keyword);
@@ -54,45 +54,42 @@ public class ProductController {
         return "inventory"; // Nombre del archivo Thymeleaf
     }
 
-    
-    @GetMapping("/main/new")
+    // crear nuevo producto
+    @GetMapping("/productos/new")
     public String showNewProductForm(Model model) {
         // Objeto vacío para el formulario de creación
-        model.addAttribute("product", new Product()); 
-        
-        
+        model.addAttribute("product", new Product());
+
         model.addAttribute("lowStockProducts", productRepository.findLowStockProducts());
-        
-        return "main"; 
+
+        return "producto_editar";
     }
 
-    
-    @GetMapping("/main/{id}")
+    // editar productos existentes
+    @GetMapping("/productos/editar/{id}")
     public String showEditProductForm(@PathVariable Long id, Model model) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("ID de producto no válido:" + id));
-        
+
         model.addAttribute("product", product);
-        
-       
+
         model.addAttribute("lowStockProducts", productRepository.findLowStockProducts());
-        
-        return "main"; 
+
+        return "producto_editar";
     }
 
-    
-    @PostMapping("/main/save")
+    // Guardar cambios
+    @PostMapping("/productos/save")
     public String saveProduct(@ModelAttribute("product") Product product, RedirectAttributes ra) {
         productRepository.save(product);
-        
+
         String action = (product.getId() == null) ? "creado" : "actualizado";
         ra.addFlashAttribute("message", "Producto " + action + " exitosamente.");
-        
-       
-        return "redirect:/inventory"; 
+
+        return "redirect:/inventory";
     }
-    
-    
+
+    // eliminar productos
     @PostMapping("/inventory/delete/{id}")
     public String deleteProduct(@PathVariable Long id, RedirectAttributes ra) {
         productRepository.deleteById(id);
@@ -100,26 +97,36 @@ public class ProductController {
         return "redirect:/inventory";
     }
 
-    
-    @PostMapping("/main/sell")
-    public String processSale(@RequestParam Long productId, @RequestParam Integer amount, RedirectAttributes ra) {
+    // mostrar vista de venta
+    @GetMapping("/productos/vender/{id}")
+    public String showVentaForm(@PathVariable Long id, Model model) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("ID no válido para venta: " + id));
+        model.addAttribute("product", product);
+        return "venta"; // vista venta.html
+    }
+
+    // procesar la venta
+    @PostMapping("/productos/procesar_venta")
+    public String processSale(@RequestParam Long productId,
+            @RequestParam Integer amount,
+            RedirectAttributes ra) {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException("ID de producto no válido para la venta:" + productId));
+                .orElseThrow(() -> new IllegalArgumentException("ID no válido: " + productId));
 
         if (product.getQuantity() >= amount) {
             product.setQuantity(product.getQuantity() - amount);
             productRepository.save(product);
-            ra.addFlashAttribute("message", "Venta de " + amount + " unidades de " + product.getName() + " procesada.");
+            ra.addFlashAttribute("message",
+                    "Venta de " + amount + " unidades de '" + product.getName() + "' realizada con éxito.");
         } else {
-            ra.addFlashAttribute("message", "Error: Stock insuficiente para la venta.");
+            ra.addFlashAttribute("message", "Error: stock insuficiente para la venta.");
         }
-        
-        
-        return "redirect:/main/" + productId;
-    }
-    
-    
 
+        return "redirect:/inventory";
+    }
+
+    // reporte en excel
     @GetMapping("/inventario/reporte")
     public ResponseEntity<InputStreamResource> generarReporteInventario() {
         try {
@@ -139,7 +146,7 @@ public class ProductController {
             FileUtils.copyInputStreamToFile(excelStream, outputFile);
             System.out.println("✅ Reporte guardado en: " + outputFile.getAbsolutePath());
 
-            //volver a crear el stream para la descarga
+            // volver a crear el stream para la descarga
             ByteArrayInputStream downloadStream = new ByteArrayInputStream(Files.readAllBytes(outputFile.toPath()));
 
             // Configurar cabeceras HTTP para descarga
