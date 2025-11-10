@@ -5,7 +5,6 @@
 
 package com.example.RodriguezPetVet.config;
 
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -19,31 +18,32 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            // Configura las rutas accesibles sin iniciar sesión
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/login", "/css/**", "/js/**", "/img/**").permitAll()
-                .requestMatchers("/dashboard/**").hasRole("ADMIN") // solo admin
-                .anyRequest().authenticated() // cualquier otra ruta requiere login
-            )
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**")) // Ignora CSRF en tus endpoints API
+                // Configura las rutas accesibles sin iniciar sesión
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/login", "/css/**", "/js/**", "/img/**").permitAll()
+                        .requestMatchers("/api/productos/**").permitAll() // se permite acceso público al API de
+                                                                          // productos
+                        .requestMatchers("/dashboard/**").hasRole("ADMIN") // solo admin
+                        .anyRequest().authenticated() // cualquier otra ruta requiere login
+                )
 
-            // Configura el formulario de login
-            .formLogin(form -> form
-                .loginPage("/login")           // tu página login.html
-                .defaultSuccessUrl("/", true) 
-                .permitAll()
-            )
+                // Configura el formulario de login
+                .formLogin(form -> form
+                        .loginPage("/login") // tu página login.html
+                        .defaultSuccessUrl("/", true)
+                        .permitAll())
 
-            // Configura el logout
-            .logout(logout -> logout
-                .logoutUrl("/logout")
-                .logoutSuccessUrl("/login?logout")
-                .invalidateHttpSession(true)
-                .clearAuthentication(true)
-                .permitAll()
-            )
+                // Configura el logout
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login?logout")
+                        .invalidateHttpSession(true)
+                        .clearAuthentication(true)
+                        .permitAll())
 
-            // Página personalizada si el usuario no tiene permisos
-            .exceptionHandling(ex -> ex.accessDeniedPage("/acceso_denegado"));
+                // Página personalizada si el usuario no tiene permisos
+                .exceptionHandling(ex -> ex.accessDeniedPage("/acceso_denegado"));
 
         return http.build();
     }
@@ -54,27 +54,18 @@ public class SecurityConfig {
     }
 }
 
+// @Bean
+// public SecurityFilterChain
+// filterChain(org.springframework.security.config.annotation.web.builders.HttpSecurity
+// http) throws Exception {
+// http
+// .csrf().disable() //
+// .authorizeHttpRequests(auth -> auth
+// .anyRequest().permitAll() //
+// )
+// .formLogin().disable() //
+// .logout().disable(); //
 
-
-
-
-
-
-
-
-
-//     @Bean
-//     public SecurityFilterChain filterChain(org.springframework.security.config.annotation.web.builders.HttpSecurity http) throws Exception {
-//         http
-//             .csrf().disable() //
-//             .authorizeHttpRequests(auth -> auth
-//                 .anyRequest().permitAll() // 
-//             )
-//             .formLogin().disable() // 
-//             .logout().disable();    // 
-
-//         return http.build();
-//     }
+// return http.build();
 // }
-
-
+// }
