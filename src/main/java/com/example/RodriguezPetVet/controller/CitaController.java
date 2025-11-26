@@ -13,11 +13,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -25,14 +22,11 @@ import java.util.Optional;
 // Usamos @RequestMapping("/citas") para que todas las rutas internas 
 // de este controlador comiencen con /citas
 @Controller
-@RequestMapping("/citas") 
+@RequestMapping("/citas")
 public class CitaController {
 
     @Autowired
     private CitaRepository citaRepository;
-
-    // Formato para parsear la fecha/hora
-    private final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
 
     /**
      * Muestra el formulario de citas y la lista de citas existentes.
@@ -42,11 +36,11 @@ public class CitaController {
     public String citas(Model model) {
         // 1. Añade un objeto Cita vacío para que el formulario se pueda llenar
         model.addAttribute("nuevaCita", new Cita());
-        
+
         // 2. Añade todas las citas existentes a la vista para mostrarlas
         List<Cita> listaCitas = citaRepository.findAll();
         model.addAttribute("citas", listaCitas);
-        
+
         return "citas";
     }
 
@@ -55,18 +49,9 @@ public class CitaController {
      * Mapea a /citas/registrar
      */
     @PostMapping("/registrar")
-    public String registrarCita(
-            @RequestParam("fechaHoraInput") String fechaHoraStr,
-            Cita nuevaCita, 
-            Model model) {
-        
-        Date fechaHora;
-        try {
-            fechaHora = formatter.parse(fechaHoraStr);
-        } catch (ParseException e) {
-            model.addAttribute("error", "Formato de fecha u hora inválido.");
-            return "citas";
-        }
+    public String registrarCita(Cita nuevaCita, Model model) {
+
+        Date fechaHora = nuevaCita.getFechaHora();
 
         // VALIDACIÓN: Busca si ya existe una cita en esa fecha y hora
         Optional<Cita> citaExistente = citaRepository.findByFechaHora(fechaHora);
@@ -79,47 +64,38 @@ public class CitaController {
         }
 
         // REGISTRO
-        nuevaCita.setFechaHora(fechaHora);
         citaRepository.save(nuevaCita);
-        
+
         model.addAttribute("mensaje", "✅ Cita registrada exitosamente para " + nuevaCita.getNombreCliente());
 
         // Redirige a /citas
         return "redirect:/citas";
     }
-    // Mostrar formulario de edición
-@GetMapping("/editar/{id}")
-public String editarCita(@PathVariable("id") Long id, Model model) {
-    Cita cita = citaRepository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("ID de cita inválido: " + id));
-    model.addAttribute("nuevaCita", cita);
-    model.addAttribute("citas", citaRepository.findAll());
-    model.addAttribute("editMode", true); // 👈 para que el HTML sepa si es edición
-    return "citas";
-}
 
-// Guardar los cambios de la edición
-@PostMapping("/actualizar")
-public String actualizarCita(@RequestParam("fechaHoraInput") String fechaHoraStr,
-                             Cita citaEditada, Model model) {
-    try {
-        Date fechaHora = formatter.parse(fechaHoraStr);
-        citaEditada.setFechaHora(fechaHora);
-    } catch (ParseException e) {
-        model.addAttribute("error", "Formato de fecha u hora inválido.");
+    // Mostrar formulario de edición
+    @GetMapping("/editar/{id}")
+    public String editarCita(@PathVariable("id") Long id, Model model) {
+        Cita cita = citaRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("ID de cita inválido: " + id));
+        model.addAttribute("nuevaCita", cita);
+        model.addAttribute("citas", citaRepository.findAll());
+        model.addAttribute("editMode", true); // 👈 para que el HTML sepa si es edición
         return "citas";
     }
 
-    citaRepository.save(citaEditada);
-    return "redirect:/citas";
-}
+    // Guardar los cambios de la edición
+    @PostMapping("/actualizar")
+    public String actualizarCita(Cita citaEditada, Model model) {
 
-// Eliminar cita
-@GetMapping("/eliminar/{id}")
-public String eliminarCita(@PathVariable("id") Long id) {
-    citaRepository.deleteById(id);
-    return "redirect:/citas";
-}
+        citaRepository.save(citaEditada);
+        return "redirect:/citas";
+    }
+
+    // Eliminar cita
+    @GetMapping("/eliminar/{id}")
+    public String eliminarCita(@PathVariable("id") Long id) {
+        citaRepository.deleteById(id);
+        return "redirect:/citas";
+    }
 
 }
-

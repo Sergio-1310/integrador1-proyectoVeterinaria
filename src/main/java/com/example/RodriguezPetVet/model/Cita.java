@@ -14,6 +14,8 @@ import jakarta.persistence.TemporalType;
 
 import java.util.Date;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
 @Entity
 public class Cita {
 
@@ -23,31 +25,54 @@ public class Cita {
 
     // Aquí almacenarás la fecha y hora de la cita
     @Temporal(TemporalType.TIMESTAMP)
-    @jakarta.persistence.Column(name = "fecha_hora") 
+    @jakarta.persistence.Column(name = "fecha_hora")
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private Date fechaHora;
 
     private String nombreCliente;
     private String nombreMascota;
     private String motivo;
 
+    public Cita() {
+    }
 
-    
-    
-    public Cita() {}
+    public Long getId() {
+        return id;
+    }
 
-    
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    
-    public Date getFechaHora() { return fechaHora; }
-    public void setFechaHora(Date fechaHora) { this.fechaHora = fechaHora; }
-    
-    public String getNombreCliente() { return nombreCliente; }
-    public void setNombreCliente(String nombreCliente) { this.nombreCliente = nombreCliente; }
-    
-    public String getNombreMascota() { return nombreMascota; }
-    public void setNombreMascota(String nombreMascota) { this.nombreMascota = nombreMascota; }
-    
-    public String getMotivo() { return motivo; }
-    public void setMotivo(String motivo) { this.motivo = motivo; }
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Date getFechaHora() {
+        return fechaHora;
+    }
+
+    public void setFechaHora(Date fechaHora) {
+        this.fechaHora = fechaHora;
+    }
+
+    public String getNombreCliente() {
+        return nombreCliente;
+    }
+
+    public void setNombreCliente(String nombreCliente) {
+        this.nombreCliente = nombreCliente;
+    }
+
+    public String getNombreMascota() {
+        return nombreMascota;
+    }
+
+    public void setNombreMascota(String nombreMascota) {
+        this.nombreMascota = nombreMascota;
+    }
+
+    public String getMotivo() {
+        return motivo;
+    }
+
+    public void setMotivo(String motivo) {
+        this.motivo = motivo;
+    }
 }
